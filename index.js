@@ -16,7 +16,9 @@ app.get('/', (req, res) => {
 app.post('/enviar', (req, res) => {
     const { denuncia } = req.body;
 
-    const texto = `Denúncia: ${denuncia}\nData: ${new Date().toLocaleString()}\n\n`;
+    const texto = `Denúncia: ${denuncia}\nData: ${new Date().toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo"
+})}\n\n`;
 
     fs.appendFileSync('denuncias.txt', texto);
 
