@@ -44,13 +44,19 @@ app.post('/admin', (req, res) => {
         return res.send("Senha incorreta!");
     }
 
-    // Ler o arquivo de denúncias
     fs.readFile('denuncias.txt', 'utf8', (err, data) => {
-        if (err) {
-            return res.send("Nenhuma denúncia encontrada.");
+        if (err || data.trim() === "") {
+            return res.send(`
+                <h2>Denúncias Recebidas</h2>
+                <p>Nenhuma denúncia encontrada.</p>
+                <form action="/limpar" method="POST">
+                    <button type="submit">🗑 Limpar todas as denúncias</button>
+                </form>
+                <br><br>
+                <a href="/admin">Voltar</a>
+            `);
         }
 
-        // Transformar em HTML mais organizado
         const denunciasFormatadas = data
             .split('\n\n')
             .filter(x => x.trim() !== "")
@@ -61,10 +67,32 @@ app.post('/admin', (req, res) => {
             <h2>Denúncias Recebidas</h2>
             ${denunciasFormatadas}
             <br><br>
+
+            <form action="/limpar" method="POST">
+                <button type="submit">🗑 Limpar todas as denúncias</button>
+            </form>
+
+            <br><br>
             <a href="/admin">Voltar</a>
         `);
     });
 });
+
+// Rota para limpar todas as denúncias
+app.post('/limpar', (req, res) => {
+    // Apagar o conteúdo do arquivo
+    fs.writeFile('denuncias.txt', '', (err) => {
+        if (err) {
+            return res.send("Erro ao limpar denúncias.");
+        }
+
+        res.send(`
+            <h2>Denúncias apagadas com sucesso!</h2>
+            <a href="/admin">Voltar ao painel</a>
+        `);
+    });
+});
+
 
 
 app.listen(port, () => {
