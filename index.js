@@ -25,6 +25,48 @@ app.post('/enviar', (req, res) => {
 
 const port = process.env.PORT || 3000;
 
+// Página de login do RH
+app.get('/admin', (req, res) => {
+    res.send(`
+        <h2>Painel do RH</h2>
+        <form method="POST" action="/admin">
+            <input type="password" name="senha" placeholder="Digite a senha" required />
+            <button type="submit">Entrar</button>
+        </form>
+    `);
+});
+
+// Verificar senha
+app.post('/admin', (req, res) => {
+    const { senha } = req.body;
+
+    if (senha !== "rh2025granja") {
+        return res.send("Senha incorreta!");
+    }
+
+    // Ler o arquivo de denúncias
+    fs.readFile('denuncias.txt', 'utf8', (err, data) => {
+        if (err) {
+            return res.send("Nenhuma denúncia encontrada.");
+        }
+
+        // Transformar em HTML mais organizado
+        const denunciasFormatadas = data
+            .split('\n\n')
+            .filter(x => x.trim() !== "")
+            .map((d, i) => `<p><b>Denúncia ${i + 1}:</b><br>${d.replace(/\n/g, "<br>")}</p>`)
+            .join('<hr>');
+
+        res.send(`
+            <h2>Denúncias Recebidas</h2>
+            ${denunciasFormatadas}
+            <br><br>
+            <a href="/admin">Voltar</a>
+        `);
+    });
+});
+
+
 app.listen(port, () => {
     console.log(`Servidor rodando: http://localhost:${port}`);
 });
