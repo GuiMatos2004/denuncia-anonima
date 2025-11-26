@@ -6,6 +6,8 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+const SENHA_ADMIN = "rh2025granja"; // senha do RH
+
 // Página principal
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public/index.html"));
@@ -34,15 +36,53 @@ app.post("/denunciar", (req, res) => {
 
   const dataHorario = new Intl.DateTimeFormat("pt-BR", options).format(now);
 
-  const texto = `Denúncia: ${denuncia}\nData: ${dataHorario}\n\n`;
+  const texto = `Denúncia: ${denuncia}\nData: ${dataHorario}\n---\n`;
 
-  // Salvar no arquivo
   fs.appendFileSync("denuncias.txt", texto);
 
-  res.send("Denúncia enviada com sucesso! Obrigado.");
+  res.send("Denúncia enviada com sucesso!");
 });
 
-// Servidor local
+// Tela de login do RH
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/login.html"));
+});
+
+// Validar senha e abrir painel
+app.post("/admin", (req, res) => {
+  const senha = req.body.senha;
+
+  if (senha === SENHA_ADMIN) {
+    res.redirect("/painel");
+  } else {
+    res.send("Senha incorreta!");
+  }
+});
+
+// Painel do RH
+app.get("/painel", (req, res) => {
+  const filePath = path.join(__dirname, "denuncias.txt");
+  let denuncias = "";
+
+  if (fs.existsSync(filePath)) {
+    denuncias = fs.readFileSync(filePath, "utf8");
+  }
+
+  res.send(`
+    <h2>Painel do RH</h2>
+    <pre>${denuncias}</pre>
+    <form action="/limpar" method="POST">
+      <button type="submit">Apagar Todas as Denúncias</button>
+    </form>
+  `);
+});
+
+// Rota para limpar denúncias
+app.post("/limpar", (req, res) => {
+  fs.writeFileSync("denuncias.txt", "");
+  res.send("Denúncias apagadas!");
+});
+
 app.listen(3000, () => {
   console.log("Servidor rodando na porta 3000");
 });
