@@ -14,11 +14,24 @@ app.get('/', (req, res) => {
 
 // Rota para receber a denúncia
 app.post('/enviar', (req, res) => {
-    const { denuncia } = req.body;
+    const now = new Date();
 
-    const texto = `Denúncia: ${denuncia}\nData: ${new Date().toLocaleString("pt-BR", {
-    timeZone: "America/Sao_Paulo"
-})}\n\n`;
+const options = {
+  timeZone: "America/Sao_Paulo",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false
+};
+
+const dataHorario = new Intl.DateTimeFormat("pt-BR", options).format(now);
+
+const texto = `Denúncia: ${denuncia}\nData: ${dataHorario}\n\n`;
+fs.appendFileSync('denuncias.txt', texto);
+
 
     fs.appendFileSync('denuncias.txt', texto);
 
