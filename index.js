@@ -23,7 +23,9 @@ app.post('/enviar', (req, res) => {
     res.send('Denúncia enviada com sucesso! Obrigado.');
 });
 
-const port = 3000;
+const port = process.env.PORT || 3000;
+
 app.listen(port, () => {
     console.log(`Servidor rodando: http://localhost:${port}`);
 });
+
